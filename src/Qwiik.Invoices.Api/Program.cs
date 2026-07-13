@@ -90,3 +90,7 @@ app.MapHealthChecks("/health/ready", new() { Predicate = c => c.Tags.Contains("r
 app.MapControllers();
 
 app.Run();
+
+// Exposes the implicit Program class so the integration test project can bind
+// WebApplicationFactory<Program> to this application's real pipeline.
+public partial class Program;

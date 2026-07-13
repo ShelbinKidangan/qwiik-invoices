@@ -35,3 +35,8 @@ document** — updated as the work progresses, not written at the end.
   and the solution scaffold.
 - I directed the structure (two projects, not a multi-project Clean Architecture layout)
   and the guardrails in `CLAUDE.md`.
+- **Security:** AI flagged a transitive high-severity advisory (GHSA-v5pm-xwqc-g5wc /
+  NU1903) — the webapi template's `Microsoft.AspNetCore.OpenApi` pulls
+  `Microsoft.OpenApi 2.0.0`. I verified a patched release exists on the same major line
+  and pinned `Microsoft.OpenApi 2.10.0` directly, keeping API compatibility.
+  `dotnet list package --vulnerable --include-transitive` now reports clean.

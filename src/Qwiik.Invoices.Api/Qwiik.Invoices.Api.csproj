@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <!-- Pin patched Microsoft.OpenApi: AspNetCore.OpenApi pulls 2.0.0 transitively,
+         which has advisory GHSA-v5pm-xwqc-g5wc (NU1903). 2.10.0 is the patched
+         release on the same major line, so it stays API-compatible. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.10.0" />
   </ItemGroup>
 
 </Project>

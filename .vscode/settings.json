@@ -1,6 +1,7 @@
 {
   "files.exclude": {
     "**/.vs": true,
+    "**/.vscode": true,
     "**/bin": true,
     "**/obj": true,
     "**/*.user": true

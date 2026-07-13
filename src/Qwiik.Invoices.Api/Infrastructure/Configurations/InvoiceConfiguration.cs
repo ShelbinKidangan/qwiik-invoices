@@ -42,6 +42,7 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
         builder.HasMany(i => i.LineItems)
             .WithOne()
             .HasForeignKey("InvoiceId")
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(i => i.LineItems)

@@ -46,7 +46,7 @@ namespace Qwiik.Invoices.Api.Infrastructure.Migrations
                     Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TaxRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    InvoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    InvoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {

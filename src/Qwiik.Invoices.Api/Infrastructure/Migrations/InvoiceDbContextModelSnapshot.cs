@@ -109,7 +109,7 @@ namespace Qwiik.Invoices.Api.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("InvoiceId")
+                    b.Property<Guid>("InvoiceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Quantity")
@@ -133,7 +133,8 @@ namespace Qwiik.Invoices.Api.Infrastructure.Migrations
                     b.HasOne("Qwiik.Invoices.Api.Domain.Invoice", null)
                         .WithMany("LineItems")
                         .HasForeignKey("InvoiceId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Qwiik.Invoices.Api.Domain.Invoice", b =>

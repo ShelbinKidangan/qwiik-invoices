@@ -33,6 +33,7 @@ coverage/
 .vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
+!.vscode/settings.json
 
 # User-specific and secrets
 appsettings.*.local.json

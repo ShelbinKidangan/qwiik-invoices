@@ -1,8 +1,7 @@
 # CLAUDE.md — Architecture rules & guardrails
 
-Guidance for any contributor (human or AI) working in this repo. The overriding goal
-of this assessment is **engineering judgment, not code volume**. The brief says
-"small, clean, thoughtful." Keep it that way.
+Guidance for any contributor (human or AI) working in this repo. The guiding
+principle is **small, clean, and thoughtful** — a well-modelled core over volume.
 
 ## What this is
 
@@ -25,8 +24,8 @@ Not an enterprise platform. A reviewer should understand the whole thing in ~10 
 - No AutoMapper for a handful of DTOs — map by hand.
 - No real auth server, payments, PDF, email, webhooks, multi-currency FX.
 
-If something is genuinely out of scope, we **name it in `SOLUTION_NOTES.md` §13**
-rather than silently skipping it — or half-building it.
+Anything intentionally out of scope is **named in `SOLUTION_NOTES.md`** rather than
+silently skipped or half-built.
 
 ## Multi-tenancy (non-negotiable)
 
@@ -41,9 +40,9 @@ rather than silently skipping it — or half-building it.
 - Money is `decimal(18,2)`; totals are server-computed, never trusted from the client.
 - Errors return RFC 7807 `ProblemDetails`. No stack traces leaked to clients.
 - Conventional commits, imperative mood. No `wip` / `fix typo` noise.
-- Every commit builds; from the testing PR onward, `dotnet test` is green.
+- Every commit builds; once tests exist, `dotnet test` is green.
 
 ## Living docs
 
 Keep [`AI_USAGE.md`](AI_USAGE.md) current as you work — note what AI generated vs.
-what was reviewed and corrected, per PR.
+what was reviewed and corrected.

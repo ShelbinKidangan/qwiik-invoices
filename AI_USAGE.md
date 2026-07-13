@@ -1,6 +1,6 @@
 # AI Usage
 
-Honest disclosure of how AI was used to build this project. This is a **living
+An honest record of how AI was used to build this project. This is a **living
 document** — updated as the work progresses, not written at the end.
 
 ## Tools used
@@ -9,13 +9,13 @@ document** — updated as the work progresses, not written at the end.
 
 ## Division of responsibility
 
-**I decided (the judgment — what this assessment actually grades):**
-- Scope boundaries: what to build impeccably vs. deliberately leave out.
+**I decided (the design and judgment):**
+- Scope boundaries: what to build carefully vs. deliberately leave out.
 - Domain model: invoice + line items, server-computed money totals.
 - Multi-tenancy strategy: shared DB + `TenantId` + EF global query filter.
 - Status lifecycle and which transitions are legal.
 - API shape, error contract, and the "no over-engineering" guardrails.
-- The PR / commit plan and how the work is sequenced.
+- The PR / commit sequencing.
 
 **AI generated (under my direction):**
 - Boilerplate and scaffolding (solution, project files, hygiene config).
@@ -26,7 +26,7 @@ document** — updated as the work progresses, not written at the end.
 - _(Filled in per PR as the build progresses.)_
 
 **What AI got wrong:**
-- _(Captured honestly as it happens — this transparency is part of the grade.)_
+- _(Captured honestly as it happens.)_
 
 ## Log by PR
 

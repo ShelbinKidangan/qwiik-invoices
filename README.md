@@ -2,7 +2,7 @@
 
 A small, multi-tenant **invoice management** backend for a SaaS product — lets a customer manage invoices for their organization.
 
-Built for the Qwiik Head of Engineering assessment. Optimized for **engineering judgment over volume**: a clean core, explicit trade-offs, and a clear statement of what was deliberately left out.
+The focus is a clean, well-modelled core with explicit trade-offs, and a clear statement of what is intentionally out of scope.
 
 ## Stack
 

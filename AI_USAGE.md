@@ -15,7 +15,7 @@ document** — updated as the work progresses, not written at the end.
 - Multi-tenancy strategy: shared DB + `TenantId` + EF global query filter.
 - Status lifecycle and which transitions are legal.
 - API shape, error contract, and the "no over-engineering" guardrails.
-- The PR / commit sequencing.
+- The stage / commit sequencing.
 
 **AI generated (under my direction):**
 - Boilerplate and scaffolding (solution, project files, hygiene config).
@@ -23,14 +23,14 @@ document** — updated as the work progresses, not written at the end.
 - First-draft documentation, which I reviewed and edited.
 
 **I reviewed / corrected:**
-- _(Filled in per PR as the build progresses.)_
+- _(Filled in per stage as the build progresses.)_
 
 **What AI got wrong:**
 - _(Captured honestly as it happens.)_
 
-## Log by PR
+## Log by Stage
 
-### PR #1 — Foundation & scaffolding
+### Stage #1 — Foundation & scaffolding
 - AI generated: `.gitignore`, `.editorconfig`, `LICENSE`, README/CLAUDE/AI_USAGE stubs,
   and the solution scaffold.
 - I directed the structure (two projects, not a multi-project Clean Architecture layout)
@@ -45,7 +45,7 @@ document** — updated as the work progresses, not written at the end.
   the dev launch URL — the modern replacement for the Swashbuckle Swagger UI that
   Microsoft dropped from the templates.
 
-### PR #2 — Persistence (EF Core)
+### Stage #2 — Persistence (EF Core)
 - AI generated: the EF Core `IEntityTypeConfiguration` classes, the `DbContext`, and the
   `InitialCreate` migration scaffolding.
 - I decided the domain shape, the status transition matrix, and the indexing strategy —
@@ -56,7 +56,7 @@ document** — updated as the work progresses, not written at the end.
   materialize the entity; the public constructor stays the only way application code can
   build an invoice, so all domain invariants remain enforced.
 
-### PR #3 — Multi-tenancy
+### Stage #3 — Multi-tenancy
 - I decided the isolation strategy: shared database + `TenantId` on every tenant-owned
   row + an EF Core global query filter so no query can leak across tenants by
   construction. The `X-Tenant-Id` header is a deliberate stub for local/dev — in
@@ -66,3 +66,20 @@ document** — updated as the work progresses, not written at the end.
   `/openapi`, `/health`), the scoped `ITenantContext`/`TenantContext`, and the
   `DbContext` wiring — the captured-tenant query filter plus stamping `TenantId` from
   context on insert (never bound from a request DTO, so no mass-assignment).
+
+### Stage #4 — Invoice API (the 5 endpoints)
+- I decided the API shape (`/api/v1/invoices`), the DTO boundaries (no `TenantId`/`Id`/
+  `Status`/money on any request), the thin-service split, and the two trade-offs now in
+  `SOLUTION_NOTES.md` (InvoiceNumber via MAX+1 with unique-index retry; RowVersion in the
+  request body rather than an ETag header).
+- AI wrote: the `InvoicesController` (create/get/list/status/summary), the thin
+  `InvoiceService` (orchestration only — all rules stay in the `Invoice` aggregate),
+  hand-written DTO mapping, the `CreateInvoiceValidator` (FluentValidation), and the
+  `PageQuery`/`PagedResult<T>` primitives.
+- **Design choices under my direction:** reads use `AsNoTracking()` and project to DTOs
+  (the list row omits line items to avoid over-fetch); the summary is a single
+  `GROUP BY Status` query rolled up in memory; `[ApiController]`'s automatic model-state
+  400 is suppressed so FluentValidation owns request validation.
+- **AI reviewed / corrected:** first draft used `AddToModelState`, which lives in the
+  `FluentValidation.AspNetCore` package; kept the dependency to core `FluentValidation`
+  and mapped validation failures into `ModelState` by hand instead.

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi(o => o.AddDocumentTransformer<TenantHeaderDocumentTransformer>());
 
-// RFC 7807 for all error responses, no leaked stack traces.
-builder.Services.AddProblemDetails();
+// RFC 7807 for all error responses; traceId correlates a client error to server logs.
+builder.Services.AddProblemDetails(o => o.CustomizeProblemDetails = ctx =>
+    ctx.ProblemDetails.Extensions["traceId"] =
+        Activity.Current?.Id ?? ctx.HttpContext.TraceIdentifier);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddControllers();
 
@@ -33,6 +38,8 @@ builder.Services.AddDbContext<InvoiceDbContext>(o =>
     o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

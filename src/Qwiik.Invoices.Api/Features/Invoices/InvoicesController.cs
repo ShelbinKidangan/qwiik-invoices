@@ -1,14 +1,12 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Qwiik.Invoices.Api.Common;
-using Qwiik.Invoices.Api.Domain;
 using Qwiik.Invoices.Api.Features.Invoices.Dtos;
 
 namespace Qwiik.Invoices.Api.Features.Invoices;
 
-// HTTP-only: parse, call InvoiceService, translate result/errors to a status code.
-// Errors map to RFC 7807 locally for now; centralised middleware is deferred to Stage #5.
+// HTTP-only: parse, call InvoiceService, translate result to a status code. Domain and
+// concurrency exceptions become ProblemDetails centrally in GlobalExceptionHandler.
 [ApiController]
 [Route("api/v1/invoices")]
 [Produces("application/json")]
@@ -37,15 +35,8 @@ public sealed class InvoicesController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        try
-        {
-            var created = await _service.CreateAsync(request, ct);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        }
-        catch (DomainException ex)
-        {
-            return DomainProblem(ex);
-        }
+        var created = await _service.CreateAsync(request, ct);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpGet("{id:guid}")]
@@ -78,22 +69,8 @@ public sealed class InvoicesController : ControllerBase
                 detail: "The supplied RowVersion is not valid base64.",
                 statusCode: StatusCodes.Status400BadRequest);
 
-        try
-        {
-            var updated = await _service.ChangeStatusAsync(id, request.Status, rowVersion, ct);
-            return updated is null ? NotFoundProblem(id) : Ok(updated);
-        }
-        catch (DomainException ex)
-        {
-            return DomainProblem(ex);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Problem(
-                title: "Concurrency conflict",
-                detail: "The invoice was modified by another request. Re-read it and retry.",
-                statusCode: StatusCodes.Status409Conflict);
-        }
+        var updated = await _service.ChangeStatusAsync(id, request.Status, rowVersion, ct);
+        return updated is null ? NotFoundProblem(id) : Ok(updated);
     }
 
     [HttpGet("summary")]
@@ -103,11 +80,6 @@ public sealed class InvoicesController : ControllerBase
         var summary = await _service.GetSummaryAsync(ct);
         return Ok(summary);
     }
-
-    private ObjectResult DomainProblem(DomainException ex) => Problem(
-        title: "Invalid invoice operation",
-        detail: ex.Message,
-        statusCode: StatusCodes.Status400BadRequest);
 
     private ObjectResult NotFoundProblem(Guid id) => Problem(
         title: "Invoice not found",

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using FluentValidation;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Qwiik.Invoices.Api.Common;
@@ -48,6 +49,10 @@ builder.Services.Configure<ApiBehaviorOptions>(o => o.SuppressModelStateInvalidF
 builder.Services.AddScoped<InvoiceService>();
 builder.Services.AddScoped<IValidator<CreateInvoiceRequest>, CreateInvoiceValidator>();
 
+// Liveness has no checks (app-is-up only); readiness adds the DB check, tagged "ready".
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<InvoiceDbContext>("database", tags: ["ready"]);
+
 // One tenant context per request: the middleware writes it, the DbContext reads it.
 builder.Services.AddScoped<TenantContext>();
 builder.Services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<TenantContext>());
@@ -77,6 +82,10 @@ app.UseHttpsRedirection();
 
 // Resolve and enforce the tenant before any endpoint can touch tenant-owned data.
 app.UseMiddleware<TenantResolutionMiddleware>();
+
+// Liveness runs no checks; readiness runs the "ready"-tagged DB check.
+app.MapHealthChecks("/health", new() { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new() { Predicate = c => c.Tags.Contains("ready") });
 
 app.MapControllers();
 

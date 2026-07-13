@@ -40,3 +40,7 @@ document** — updated as the work progresses, not written at the end.
   `Microsoft.OpenApi 2.0.0`. I verified a patched release exists on the same major line
   and pinned `Microsoft.OpenApi 2.10.0` directly, keeping API compatibility.
   `dotnet list package --vulnerable --include-transitive` now reports clean.
+- **API UI:** the .NET 10 template ships only the OpenAPI document (no UI). Added
+  Scalar (`Scalar.AspNetCore`) as the interactive reference at `/scalar` and set it as
+  the dev launch URL — the modern replacement for the Swashbuckle Swagger UI that
+  Microsoft dropped from the templates.

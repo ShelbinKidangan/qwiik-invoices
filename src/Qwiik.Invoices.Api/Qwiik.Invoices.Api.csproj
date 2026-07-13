@@ -12,6 +12,7 @@
          which has advisory GHSA-v5pm-xwqc-g5wc (NU1903). 2.10.0 is the patched
          release on the same major line, so it stays API-compatible. -->
     <PackageReference Include="Microsoft.OpenApi" Version="2.10.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.11" />
   </ItemGroup>
 
 </Project>

@@ -30,6 +30,9 @@ dotnet build
 dotnet run --project src/Qwiik.Invoices.Api
 ```
 
+In development this opens an interactive **Scalar** API reference at `/scalar`
+(the OpenAPI document is served at `/openapi/v1.json`).
+
 ## Documentation
 
 - [`SOLUTION_NOTES.md`](SOLUTION_NOTES.md) — architecture, design decisions, trade-offs _(added later)_

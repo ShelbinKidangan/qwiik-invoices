@@ -26,12 +26,12 @@ public sealed class InvoiceService
 
     public async Task<InvoiceResponse> CreateAsync(CreateInvoiceRequest request, CancellationToken ct)
     {
-        var lineItems = request.LineItems
-            .Select(li => new InvoiceLineItem(li.Description, li.Quantity, li.UnitPrice, li.TaxRate))
-            .ToList();
-
         for (var attempt = 0; ; attempt++)
         {
+            var lineItems = request.LineItems
+                .Select(li => new InvoiceLineItem(li.Description, li.Quantity, li.UnitPrice, li.TaxRate))
+                .ToList();
+
             var number = await GenerateInvoiceNumberAsync(request.IssueDate.Year, ct);
 
             // TenantId is stamped by the DbContext from the tenant context, never bound

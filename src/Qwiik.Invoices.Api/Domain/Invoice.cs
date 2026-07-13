@@ -16,7 +16,6 @@ public sealed class Invoice
     public string CustomerEmail { get; private set; }
     public InvoiceStatus Status { get; private set; }
 
-    /// <summary>ISO 4217 three-letter currency code.</summary>
     public string Currency { get; private set; }
 
     public DateOnly IssueDate { get; private set; }

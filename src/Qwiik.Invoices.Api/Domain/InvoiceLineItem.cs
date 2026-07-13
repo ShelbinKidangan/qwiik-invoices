@@ -11,7 +11,6 @@ public sealed class InvoiceLineItem
     public decimal Quantity { get; private set; }
     public decimal UnitPrice { get; private set; }
 
-    /// <summary>Tax rate as a percent, e.g. <c>10</c> means 10%.</summary>
     public decimal TaxRate { get; private set; }
 
     /// <summary>Line amount including tax, rounded to 2 decimal places.</summary>

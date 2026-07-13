@@ -55,3 +55,14 @@ document** — updated as the work progresses, not written at the end.
   navigation, which EF cannot bind. Added a private parameterless constructor for EF to
   materialize the entity; the public constructor stays the only way application code can
   build an invoice, so all domain invariants remain enforced.
+
+### PR #3 — Multi-tenancy
+- I decided the isolation strategy: shared database + `TenantId` on every tenant-owned
+  row + an EF Core global query filter so no query can leak across tenants by
+  construction. The `X-Tenant-Id` header is a deliberate stub for local/dev — in
+  production the tenant comes from a validated JWT claim, not a client header.
+- AI wrote: the `TenantResolutionMiddleware` (header parse/validate, 400
+  `ProblemDetails` on missing/invalid, anonymous pass-through for `/`, `/scalar`,
+  `/openapi`, `/health`), the scoped `ITenantContext`/`TenantContext`, and the
+  `DbContext` wiring — the captured-tenant query filter plus stamping `TenantId` from
+  context on insert (never bound from a request DTO, so no mass-assignment).

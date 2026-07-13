@@ -1,0 +1,6 @@
+@Qwiik.Invoices.Api_HostAddress = http://localhost:5268
+
+GET {{Qwiik.Invoices.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

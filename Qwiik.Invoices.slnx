@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Qwiik.Invoices.Api/Qwiik.Invoices.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Qwiik.Invoices.Tests/Qwiik.Invoices.Tests.csproj" />
+  </Folder>
+</Solution>

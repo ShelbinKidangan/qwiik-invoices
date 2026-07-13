@@ -10,7 +10,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(o => o.AddDocumentTransformer<TenantHeaderDocumentTransformer>());
 
 // RFC 7807 for all error responses, no leaked stack traces.
 builder.Services.AddProblemDetails();

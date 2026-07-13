@@ -19,6 +19,8 @@
          release on the same major line, so it stays API-compatible. -->
     <PackageReference Include="Microsoft.OpenApi" Version="2.10.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.11" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
   </ItemGroup>
 
 </Project>

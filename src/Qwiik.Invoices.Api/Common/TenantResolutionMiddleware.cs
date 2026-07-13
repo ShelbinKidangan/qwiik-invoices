@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using Serilog.Context;
 
 namespace Qwiik.Invoices.Api.Common;
 
@@ -23,7 +25,8 @@ public sealed class TenantResolutionMiddleware
 
     public TenantResolutionMiddleware(RequestDelegate next) => _next = next;
 
-    public async Task InvokeAsync(HttpContext context, TenantContext tenant)
+    public async Task InvokeAsync(
+        HttpContext context, TenantContext tenant, IDiagnosticContext diagnosticContext)
     {
         if (IsAnonymousPath(context.Request.Path))
         {
@@ -39,7 +42,13 @@ public sealed class TenantResolutionMiddleware
         }
 
         tenant.SetTenant(tenantId);
-        await _next(context);
+
+        // LogContext enriches downstream logs; diagnostic context enriches the request log.
+        diagnosticContext.Set("TenantId", tenantId);
+        using (LogContext.PushProperty("TenantId", tenantId))
+        {
+            await _next(context);
+        }
     }
 
     private static bool IsAnonymousPath(PathString path)

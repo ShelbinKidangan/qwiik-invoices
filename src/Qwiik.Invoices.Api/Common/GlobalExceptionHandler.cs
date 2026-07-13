@@ -11,14 +11,21 @@ namespace Qwiik.Invoices.Api.Common;
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly IProblemDetailsService _problemDetails;
+    private readonly ILogger<GlobalExceptionHandler> _logger;
 
-    public GlobalExceptionHandler(IProblemDetailsService problemDetails) =>
+    public GlobalExceptionHandler(
+        IProblemDetailsService problemDetails, ILogger<GlobalExceptionHandler> logger)
+    {
         _problemDetails = problemDetails;
+        _logger = logger;
+    }
 
     public async ValueTask<bool> TryHandleAsync(
         HttpContext context, Exception exception, CancellationToken ct)
     {
         var (status, title, detail) = Map(exception);
+
+        Log(exception, status);
 
         context.Response.StatusCode = status;
 
@@ -34,6 +41,16 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
                 Instance = context.Request.Path
             }
         });
+    }
+
+    // A 500 is a genuine fault (log the exception); mapped 4xx cases are expected.
+    private void Log(Exception exception, int status)
+    {
+        if (status == StatusCodes.Status500InternalServerError)
+            _logger.LogError(exception, "Unhandled exception processing the request");
+        else
+            _logger.LogWarning(
+                "Request failed with {StatusCode}: {Message}", status, exception.Message);
     }
 
     // Unmapped exceptions get a generic 500 detail — the real message is never leaked.

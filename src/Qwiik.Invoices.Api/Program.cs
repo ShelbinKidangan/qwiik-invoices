@@ -8,8 +8,27 @@ using Qwiik.Invoices.Api.Features.Invoices.Dtos;
 using Qwiik.Invoices.Api.Features.Invoices.Validation;
 using Qwiik.Invoices.Api.Infrastructure;
 using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Readable console in dev, JSON in production; every line enriched from the LogContext.
+builder.Host.UseSerilog((context, config) =>
+{
+    config
+        .MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .Enrich.FromLogContext();
+
+    if (context.HostingEnvironment.IsDevelopment())
+        config.WriteTo.Console(outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} " +
+            "{{CorrelationId={CorrelationId}, TenantId={TenantId}}}{NewLine}{Exception}");
+    else
+        config.WriteTo.Console(new JsonFormatter(renderMessage: true));
+});
 
 builder.Services.AddOpenApi(o => o.AddDocumentTransformer<TenantHeaderDocumentTransformer>());
 
@@ -39,7 +58,13 @@ builder.Services.AddDbContext<InvoiceDbContext>(o =>
 
 var app = builder.Build();
 
+// Outermost, so the correlation id is on the LogContext before the exception handler
+// or Serilog's request log writes any line for this request.
+app.UseMiddleware<CorrelationIdMiddleware>();
+
 app.UseExceptionHandler();
+
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {

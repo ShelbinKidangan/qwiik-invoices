@@ -44,3 +44,14 @@ document** — updated as the work progresses, not written at the end.
   Scalar (`Scalar.AspNetCore`) as the interactive reference at `/scalar` and set it as
   the dev launch URL — the modern replacement for the Swashbuckle Swagger UI that
   Microsoft dropped from the templates.
+
+### PR #2 — Persistence (EF Core)
+- AI generated: the EF Core `IEntityTypeConfiguration` classes, the `DbContext`, and the
+  `InitialCreate` migration scaffolding.
+- I decided the domain shape, the status transition matrix, and the indexing strategy —
+  the composite indexes lead with `TenantId` because every query is tenant-scoped.
+- **AI reviewed / corrected:** design-time model creation failed because the `Invoice`
+  aggregate exposes only a validating constructor that takes its line items as a
+  navigation, which EF cannot bind. Added a private parameterless constructor for EF to
+  materialize the entity; the public constructor stays the only way application code can
+  build an invoice, so all domain invariants remain enforced.

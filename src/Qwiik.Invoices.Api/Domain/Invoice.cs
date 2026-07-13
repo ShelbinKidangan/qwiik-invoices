@@ -35,6 +35,17 @@ public sealed class Invoice
 
     public IReadOnlyCollection<InvoiceLineItem> LineItems => _lineItems.AsReadOnly();
 
+    // Required by EF Core to materialize the entity. The public constructor above
+    // remains the only way for application code to create an invoice, so all
+    // domain invariants are still enforced on construction.
+    private Invoice()
+    {
+        InvoiceNumber = null!;
+        CustomerName = null!;
+        CustomerEmail = null!;
+        Currency = null!;
+    }
+
     public Invoice(
         Guid tenantId,
         string invoiceNumber,

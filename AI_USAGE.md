@@ -83,3 +83,16 @@ document** — updated as the work progresses, not written at the end.
 - **AI reviewed / corrected:** first draft used `AddToModelState`, which lives in the
   `FluentValidation.AspNetCore` package; kept the dependency to core `FluentValidation`
   and mapped validation failures into `ModelState` by hand instead.
+
+### Stage #6 — Tests
+- I decided the test strategy and the provider choice: integration tests run against a
+  **real SQL Server** — Testcontainers by default with a **LocalDB fallback** via the
+  `QWIIK_TEST_SQL` env var — applying the **real EF migration** (not `EnsureCreated`), so
+  the suite exercises the production schema. On that harness I chose to prove the things a
+  fake provider can't: **tenant isolation** through the global query filter and
+  **optimistic concurrency** and **invoice-number collision retry** against the actual
+  SQL `rowversion` and unique index.
+- AI wrote: the integration harness (`SqlServerFixture`, `InvoiceApiFactory`,
+  `IntegrationTestBase`, the shared collection) and the test cases across the domain and
+  integration suites — including the stale-rowversion 409 case and the concurrent
+  same-tenant create race that guards the line-item-reuse fix.

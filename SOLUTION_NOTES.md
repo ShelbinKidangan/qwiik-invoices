@@ -250,6 +250,9 @@ Two tiers, each covering what it is best placed to prove — no coverage theater
   `rowversion`, the **invoice-number collision retry** against the unique index,
   end-to-end endpoint behaviour (validation `400`s, `404`s, listing/paging/filter, status
   changes), and the missing-tenant `400`.
+- **Run in CI on every push/PR to `main`** — GitHub Actions builds in Release and runs the
+  whole suite, provisioning SQL Server via Testcontainers on the runner's Docker daemon
+  (see §11), so a regression cannot merge green.
 - **Deliberately not covered:** exhaustive controller permutations already guaranteed by
   the type system or by the domain unit tests, and load/performance testing — out of
   scope for a module of this size.
@@ -270,9 +273,12 @@ A pragmatic, cost-aware path — not an enterprise landing zone.
 - **Configuration — 12-factor via environment / Azure App Configuration.** Everything
   environment-specific (connection strings, log levels) comes from configuration, exactly
   as `ConnectionStrings__DefaultConnection` does locally.
-- **CI/CD — GitHub Actions** building and pushing the image, deploying to a **staging
-  slot**, then swapping to production for **zero-downtime** releases and instant
-  **rollback via swap-back**.
+- **CI is in place — GitHub Actions** (`.github/workflows/ci.yml`) restores, builds
+  (Release), and runs the full test suite on every push and PR to `main`; the integration
+  tests provision a real SQL Server via Testcontainers on the runner's Docker daemon.
+  **CD is the planned extension** — build and push the image, deploy to a **staging
+  slot**, then swap to production for **zero-downtime** releases and instant **rollback
+  via swap-back**.
 - **Migrations as a release gate**, not auto-run in prod — a dedicated pipeline step
   applies the idempotent `db/script.sql` (or `dotnet ef database update`) under change
   control before the swap. The app only auto-migrates outside Production.

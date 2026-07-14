@@ -59,6 +59,9 @@ dotnet test
 Integration tests run against a real SQL Server — Testcontainers by default (Docker
 running), or set `QWIIK_TEST_SQL` to a LocalDB/SQL Server connection string as a fallback.
 
+CI (GitHub Actions) builds in Release and runs the full suite on every push and PR to
+`main`, using Testcontainers on the runner's Docker daemon.
+
 ### Trying the endpoints
 
 [`requests.http`](requests.http) is a runnable set covering all 5 endpoints plus a

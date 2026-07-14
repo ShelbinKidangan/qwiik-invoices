@@ -8,7 +8,7 @@ document** — updated as the work progresses, not written at the end.
 Built in **7 sequential stages**, each a self-contained slice that compiles
 green (and from the testing stage on, passes tests): Foundation → Domain &
 persistence → Multi-tenancy → Invoice API → Production hardening → Testing →
-Docs. Every change landed as its own small, reviewable commit on `main`.
+Docs & CI. Every change landed as its own small, reviewable commit on `main`.
 
 The AI-assisted workflow, kept deliberately disciplined:
 
@@ -142,10 +142,14 @@ The AI-assisted workflow, kept deliberately disciplined:
   integration suites — including the stale-rowversion 409 case and the concurrent
   same-tenant create race that guards the line-item-reuse fix.
 
-### Stage #7 — Docs & final hardening
+### Stage #7 — Docs, CI & final hardening
 - AI drafted the living docs and delivery artifacts under my review: `SOLUTION_NOTES.md`
   (architecture, trade-offs, Azure plan), the `README` quickstart, `requests.http`, and
   the `docker compose` / `Dockerfile` / idempotent `db/script.sql` one-command run.
+- **CI:** a GitHub Actions workflow (`.github/workflows/ci.yml`) restores, builds
+  (Release), and runs the full test suite on every push and PR to `main` — the
+  integration tests spin up a real SQL Server via Testcontainers on the runner's Docker
+  daemon, so "compiles green and passes tests" is enforced, not just claimed.
 - I reviewed the two trade-offs originally logged as known limitations and decided to fix
   rather than keep documenting them (see **What AI got wrong** above).
 - **Totals reconciliation:** changed the money math to round each line's net and tax to

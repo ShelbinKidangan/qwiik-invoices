@@ -96,3 +96,64 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260714052936_RenameInvoiceLineItemsTable'
+)
+BEGIN
+    ALTER TABLE [InvoiceLineItem] DROP CONSTRAINT [FK_InvoiceLineItem_Invoices_InvoiceId];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260714052936_RenameInvoiceLineItemsTable'
+)
+BEGIN
+    ALTER TABLE [InvoiceLineItem] DROP CONSTRAINT [PK_InvoiceLineItem];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260714052936_RenameInvoiceLineItemsTable'
+)
+BEGIN
+    EXEC sp_rename N'[InvoiceLineItem]', N'InvoiceLineItems', 'OBJECT';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260714052936_RenameInvoiceLineItemsTable'
+)
+BEGIN
+    EXEC sp_rename N'[InvoiceLineItems].[IX_InvoiceLineItem_InvoiceId]', N'IX_InvoiceLineItems_InvoiceId', 'INDEX';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260714052936_RenameInvoiceLineItemsTable'
+)
+BEGIN
+    ALTER TABLE [InvoiceLineItems] ADD CONSTRAINT [PK_InvoiceLineItems] PRIMARY KEY ([Id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260714052936_RenameInvoiceLineItemsTable'
+)
+BEGIN
+    ALTER TABLE [InvoiceLineItems] ADD CONSTRAINT [FK_InvoiceLineItems_Invoices_InvoiceId] FOREIGN KEY ([InvoiceId]) REFERENCES [Invoices] ([Id]) ON DELETE CASCADE;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260714052936_RenameInvoiceLineItemsTable'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260714052936_RenameInvoiceLineItemsTable', N'10.0.9');
+END;
+
+COMMIT;
+GO
+

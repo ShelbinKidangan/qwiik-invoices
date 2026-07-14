@@ -37,6 +37,25 @@ public class InvoiceTotalsTests
     }
 
     [Fact]
+    public void RecalculateTotals_WithFractionalCentRounding_TotalEqualsSumOfLineTotals()
+    {
+        // Regression: 1.11 * 1.05 = 1.1655 -> each line rounds to 1.17. Summing the raw
+        // amounts and rounding once (the old approach) gave Total = 2.33 while the line
+        // column showed 2.34 — a one-cent drift. Rounding each line's net and tax first
+        // makes Subtotal + TaxTotal = Total = the sum of the line totals, exactly.
+        var invoice = InvoiceFactory.DraftInvoice(
+            InvoiceFactory.LineItem("A", quantity: 1m, unitPrice: 1.11m, taxRate: 5m),
+            InvoiceFactory.LineItem("B", quantity: 1m, unitPrice: 1.11m, taxRate: 5m));
+
+        var sumOfLineTotals = invoice.LineItems.Sum(li => li.LineTotal);
+
+        invoice.Total.Should().Be(2.34m);
+        invoice.Total.Should().Be(sumOfLineTotals);
+        invoice.Subtotal.Should().Be(invoice.LineItems.Sum(li => li.NetAmount));
+        invoice.TaxTotal.Should().Be(invoice.LineItems.Sum(li => li.TaxAmount));
+    }
+
+    [Fact]
     public void RecalculateTotals_WithZeroTax_LeavesTaxTotalZeroAndTotalEqualToSubtotal()
     {
         var invoice = InvoiceFactory.DraftInvoice(

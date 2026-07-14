@@ -26,7 +26,18 @@ document** — updated as the work progresses, not written at the end.
 - _(Filled in per stage as the build progresses.)_
 
 **What AI got wrong:**
-- _(Captured honestly as it happens.)_
+- **Rounding drift between line totals and the invoice total.** AI's first draft of the
+  money math summed the raw line amounts and rounded once at the end (`Total`), while
+  each `LineTotal` rounded per line — so the displayed line column could sum to a cent
+  more/less than `Total`. Defensible, but wrong for an invoice, where the line column
+  must reconcile. Corrected to round each line's net and tax to 2dp first, then sum, so
+  `Subtotal + TaxTotal = Total = Σ LineTotal` by construction. (Domain unit tests still
+  pass unchanged — the asserted totals were unaffected; only the reconciliation was.)
+- **Inconsistent table naming.** AI mapped `InvoiceLineItem` without a `DbSet` (correct —
+  it is an aggregate-internal entity, not a root), but that left EF naming the table
+  after the singular type while `Invoices` was plural. Fixed with an explicit
+  `ToTable("InvoiceLineItems")` and a rename migration. Both were first written up
+  honestly as known limitations, then fixed rather than left documented.
 
 ## Log by Stage
 
@@ -96,3 +107,19 @@ document** — updated as the work progresses, not written at the end.
   `IntegrationTestBase`, the shared collection) and the test cases across the domain and
   integration suites — including the stale-rowversion 409 case and the concurrent
   same-tenant create race that guards the line-item-reuse fix.
+
+### Hardening — totals reconciliation & table naming
+- I reviewed the two trade-offs originally logged as known limitations and decided to fix
+  rather than keep documenting them (see **What AI got wrong** above).
+- **Totals reconciliation:** changed the money math to round each line's net and tax to
+  2dp before summing, so `Subtotal + TaxTotal = Total = Σ LineTotal` by construction. The
+  existing totals tests passed unchanged (their asserted values were unaffected) — which
+  is exactly why the drift slipped through, so AI added a dedicated regression test
+  (`RecalculateTotals_WithFractionalCentRounding_TotalEqualsSumOfLineTotals`) asserting
+  the reconciliation invariant on an input that previously drifted a cent.
+- **Table naming:** added `ToTable("InvoiceLineItems")` plus a rename migration so the
+  table is plural, consistent with `Invoices`. The rename is already exercised by the
+  integration suite, which applies the real migration against real SQL — no extra test
+  warranted.
+- I updated `SOLUTION_NOTES.md` to drop the two resolved limitations and note the
+  reconciliation guarantee in the domain-model section.

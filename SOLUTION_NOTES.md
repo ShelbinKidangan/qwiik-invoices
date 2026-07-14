@@ -125,7 +125,8 @@ status are decided.
   Any other transition throws `DomainException`.
 - **Server-computed money.** `Subtotal`, `TaxTotal`, and `Total` are recomputed from the
   line items inside the aggregate and never accepted from outside — a client cannot
-  supply or tamper with a total.
+  supply or tamper with a total. Each line's net and tax are rounded to 2dp first, then
+  summed, so the totals always reconcile with the sum of the displayed line totals.
 - **Invariants enforced in the constructor.** Required customer/currency fields, a valid
   3-letter currency, `DueDate ≥ IssueDate`, and at least one line item are all checked
   on construction, so an `Invoice` cannot exist in an invalid state. Line-item
@@ -318,11 +319,6 @@ Named honestly rather than hidden.
   is no customer record to update or de-duplicate against.
 - **No soft-delete or audit-history tables** — rows are updated in place; there is no
   change log beyond `CreatedAtUtc`/`UpdatedAtUtc`.
-- **A cent of rounding drift is possible.** Each `LineTotal` rounds per line, while
-  `Invoice.Total` rounds the summed subtotal and tax, so the sum of the displayed line
-  totals can differ from `Total` by a cent. **`Total` is authoritative.**
-- **Table naming is inconsistent** — `Invoices` (plural) vs `InvoiceLineItem` (singular).
-  Cosmetic; left as-is to avoid a churny rename migration.
 - **Invoice number is `MAX+1` with a unique-index retry.** The number is
   `INV-{year}-{seq:D5}`, computed as `1 + MAX(seq)` for the tenant/year. Two concurrent
   creates can compute the same number; the unique `(TenantId, InvoiceNumber)` index

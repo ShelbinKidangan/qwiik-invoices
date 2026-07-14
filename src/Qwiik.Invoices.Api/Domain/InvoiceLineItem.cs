@@ -13,9 +13,19 @@ public sealed class InvoiceLineItem
 
     public decimal TaxRate { get; private set; }
 
-    /// <summary>Line amount including tax, rounded to 2 decimal places.</summary>
-    public decimal LineTotal =>
-        Math.Round(Quantity * UnitPrice * (1 + TaxRate / 100), 2, MidpointRounding.AwayFromZero);
+    /// <summary>Net line amount (before tax), rounded to 2 decimal places.</summary>
+    public decimal NetAmount =>
+        Math.Round(Quantity * UnitPrice, 2, MidpointRounding.AwayFromZero);
+
+    /// <summary>Tax on this line, rounded to 2 decimal places.</summary>
+    public decimal TaxAmount =>
+        Math.Round(Quantity * UnitPrice * TaxRate / 100, 2, MidpointRounding.AwayFromZero);
+
+    /// <summary>
+    /// Line amount including tax. Net and tax are each rounded first, so the invoice
+    /// totals (which sum these) always reconcile with the displayed line column.
+    /// </summary>
+    public decimal LineTotal => NetAmount + TaxAmount;
 
     public InvoiceLineItem(string description, decimal quantity, decimal unitPrice, decimal taxRate)
     {

@@ -114,7 +114,9 @@ public sealed class Invoice
 
     /// <summary>
     /// Recomputes Subtotal, TaxTotal and Total from the line items. Server-computed
-    /// only — money is never accepted from outside the domain.
+    /// only — money is never accepted from outside the domain. Each line's net and tax
+    /// are rounded first (see <see cref="InvoiceLineItem"/>), then summed, so the totals
+    /// always reconcile with the sum of the displayed line totals.
     /// </summary>
     private void RecalculateTotals()
     {
@@ -123,12 +125,12 @@ public sealed class Invoice
 
         foreach (var item in _lineItems)
         {
-            subtotal += item.Quantity * item.UnitPrice;
-            taxTotal += item.Quantity * item.UnitPrice * item.TaxRate / 100;
+            subtotal += item.NetAmount;
+            taxTotal += item.TaxAmount;
         }
 
-        Subtotal = Math.Round(subtotal, 2, MidpointRounding.AwayFromZero);
-        TaxTotal = Math.Round(taxTotal, 2, MidpointRounding.AwayFromZero);
-        Total = Subtotal + TaxTotal;
+        Subtotal = subtotal;
+        TaxTotal = taxTotal;
+        Total = subtotal + taxTotal;
     }
 }

@@ -63,6 +63,14 @@ builder.Services.AddDbContext<InvoiceDbContext>(o =>
 
 var app = builder.Build();
 
+// Apply pending migrations on startup so `docker compose up` yields a ready schema.
+// Skipped in Production, where migrations run as a separate gate.
+if (!app.Environment.IsProduction())
+{
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<InvoiceDbContext>().Database.Migrate();
+}
+
 // Outermost, so the correlation id is on the LogContext before the exception handler
 // or Serilog's request log writes any line for this request.
 app.UseMiddleware<CorrelationIdMiddleware>();

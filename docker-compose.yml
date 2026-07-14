@@ -1,0 +1,40 @@
+# One-command run: `docker compose up --build` -> http://localhost:8080/scalar
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      # Dev-only default; override via .env or a real secret in any shared env.
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Your_strong_Passw0rd!}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      # mssql-tools18 sqlcmd needs -C to trust the server's self-signed dev cert.
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" -b",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  api:
+    build:
+      context: ./src/Qwiik.Invoices.Api
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Non-Production, so Scalar is mapped and migrations run on startup (see Program.cs).
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=QwiikInvoices;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Your_strong_Passw0rd!};TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true"
+    ports:
+      - "8080:8080"
+
+volumes:
+  mssql-data:

@@ -33,6 +33,20 @@ simplified is named here rather than silently skipped or half-built.
   the roll-up (outstanding = Sent + Overdue, paid, overdue count/amount) is composed
   in memory from those few rows rather than pushed into SQL `CASE` expressions.
 
+## Run tooling (Stage #7)
+
+- **One-command run** — `docker compose up --build` starts SQL Server 2022, waits on
+  its healthcheck, then builds and starts the API (multi-stage Dockerfile). Scalar is
+  at `http://localhost:8080/scalar`; `requests.http` exercises all 5 endpoints.
+- **Migration on startup** — the API calls `Database.Migrate()` on boot, guarded to
+  skip `Production`, so the compose flow comes up with a ready schema and no manual
+  step. The trade-off: applying migrations from the web process is convenient for
+  dev/demo but wrong for production, where concurrent instances would race and a failed
+  migration should block the deploy, not a running app. **Production strategy:** apply
+  migrations as a separate, auditable gate — a CI/CD step, or hand the committed
+  idempotent `db/script.sql` (from `dotnet ef migrations script --idempotent`) to a DBA
+  to run under change control. The app process never migrates in prod.
+
 ## Deferred to later stages
 
 - Centralised exception→ProblemDetails middleware — Stage #5.

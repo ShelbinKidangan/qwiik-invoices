@@ -48,4 +48,15 @@ public sealed class InvoiceApiFactory : WebApplicationFactory<Program>
         client.DefaultRequestHeaders.Add("X-Tenant-Id", tenantId.ToString());
         return client;
     }
+
+    /// <summary>
+    /// An <see cref="HttpClient"/> carrying a caller-supplied raw <c>X-Tenant-Id</c> value,
+    /// used to exercise the middleware's rejection of malformed tenant headers.
+    /// </summary>
+    public HttpClient ClientWithRawTenantHeader(string headerValue)
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", headerValue);
+        return client;
+    }
 }

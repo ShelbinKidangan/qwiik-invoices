@@ -3,6 +3,29 @@
 An honest record of how AI was used to build this project. This is a **living
 document** — updated as the work progresses, not written at the end.
 
+## Method — how this was built
+
+Built in **7 sequential stages**, each a self-contained slice that compiles
+green (and from the testing stage on, passes tests): Foundation → Domain &
+persistence → Multi-tenancy → Invoice API → Production hardening → Testing →
+Docs. Every change landed as its own small, reviewable commit on `main`.
+
+The AI-assisted workflow, kept deliberately disciplined:
+
+- **Scoped commit.** Each change was scoped small enough to review as a
+  single diff — no large multi-feature generations.
+- **I reviewed every diff before it landed.** AI drafted; I accepted, corrected,
+  or rejected. Nothing was committed unread.
+- **Guardrails set before generating.** `CLAUDE.md` fixed the conventions and the
+  "no over-engineering" boundaries up front, so generated code matched the
+  house style instead of being reshaped after.
+- **Design decided by me, plumbing by AI.** Domain invariants, tenancy strategy,
+  status lifecycle, and API contract were my calls; scaffolding, EF config, and
+  test harness were AI first-drafts under that direction.
+- **Verified behaviour, not just the build.** Tenant isolation and optimistic
+  concurrency were proven against real SQL Server, not asserted.
+- **Trade-offs and AI mistakes disclosed, not hidden** — see below.
+
 ## Tools used
 
 - **Claude Code (Opus)** — used as a pair-programmer, directed by me.
@@ -56,7 +79,9 @@ document** — updated as the work progresses, not written at the end.
   the dev launch URL — the modern replacement for the Swashbuckle Swagger UI that
   Microsoft dropped from the templates.
 
-### Stage #2 — Persistence (EF Core)
+### Stage #2 — Domain & persistence
+- The `Invoice` aggregate, its `InvoiceLineItem`s, and the status enum were modelled
+  here, with the business rules (totals, transitions, invariants) living in the entities.
 - AI generated: the EF Core `IEntityTypeConfiguration` classes, the `DbContext`, and the
   `InitialCreate` migration scaffolding.
 - I decided the domain shape, the status transition matrix, and the indexing strategy —
@@ -95,7 +120,16 @@ document** — updated as the work progresses, not written at the end.
   `FluentValidation.AspNetCore` package; kept the dependency to core `FluentValidation`
   and mapped validation failures into `ModelState` by hand instead.
 
-### Stage #6 — Tests
+### Stage #5 — Production hardening
+- I decided the cross-cutting concerns: one RFC 7807 error contract, per-request
+  correlated structured logs, and liveness/readiness health probes for the platform.
+- AI wrote: the `GlobalExceptionHandler` mapping unhandled exceptions to `ProblemDetails`
+  centrally (no controller leaks a stack trace), the `CorrelationIdMiddleware` + Serilog
+  structured logging that stamps `CorrelationId` (and `TenantId`) on every log line and
+  echoes `X-Correlation-Id` back, and the `/health` (liveness) / `/health/ready`
+  (readiness — includes the DB check) endpoints.
+
+### Stage #6 — Testing
 - I decided the test strategy and the provider choice: integration tests run against a
   **real SQL Server** — Testcontainers by default with a **LocalDB fallback** via the
   `QWIIK_TEST_SQL` env var — applying the **real EF migration** (not `EnsureCreated`), so
@@ -108,7 +142,10 @@ document** — updated as the work progresses, not written at the end.
   integration suites — including the stale-rowversion 409 case and the concurrent
   same-tenant create race that guards the line-item-reuse fix.
 
-### Hardening — totals reconciliation & table naming
+### Stage #7 — Docs & final hardening
+- AI drafted the living docs and delivery artifacts under my review: `SOLUTION_NOTES.md`
+  (architecture, trade-offs, Azure plan), the `README` quickstart, `requests.http`, and
+  the `docker compose` / `Dockerfile` / idempotent `db/script.sql` one-command run.
 - I reviewed the two trade-offs originally logged as known limitations and decided to fix
   rather than keep documenting them (see **What AI got wrong** above).
 - **Totals reconciliation:** changed the money math to round each line's net and tax to

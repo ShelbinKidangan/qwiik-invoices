@@ -23,8 +23,8 @@ X-Tenant-Id: {{tenant}}
   "dueDate": "2026-07-31",
   "notes": "Q3 retainer",
   "lineItems": [
-    { "description": "Consulting", "quantity": 10, "unitPrice": 150.00, "taxRate": 0.10 },
-    { "description": "Support",    "quantity": 5,  "unitPrice": 80.00,  "taxRate": 0.10 }
+    { "description": "Consulting", "quantity": 10, "unitPrice": 150.00, "taxRate": 10 },
+    { "description": "Support",    "quantity": 5,  "unitPrice": 80.00,  "taxRate": 10 }
   ]
 }
 

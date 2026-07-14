@@ -34,6 +34,9 @@ docker compose up --build
 
 Brings up SQL Server, applies the EF migration on startup, and serves the API.
 
+Quick smoke test once it's up — `GET http://localhost:8080/health/ready` should return
+`200` (API up + DB check passed). It's block `### 0` in [`requests.http`](requests.http).
+
 ### Local dotnet (LocalDB)
 
 ```bash

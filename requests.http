@@ -9,6 +9,10 @@
 @host = http://localhost:8080
 @tenant = 11111111-1111-1111-1111-111111111111
 
+### 0. Smoke test — is the stack up? No tenant header needed (anonymous path).
+# 200 from /health/ready means the API is up AND the database check passed.
+GET {{host}}/health/ready
+
 ### 1. Create an invoice — server derives InvoiceNumber, Status, and all totals.
 # @name create
 POST {{host}}/api/v1/invoices

@@ -19,6 +19,8 @@ The API applies its EF migration on startup, so the schema is ready with no manu
 
 - Interactive API reference (Scalar): **http://localhost:8080/scalar**
 - Health: `GET /health` (liveness), `GET /health/ready` (readiness — includes the DB check)
+- Quick smoke test: `GET http://localhost:8080/health/ready` should return `200` (API up +
+  DB check passed) — it's block `### 0` in [`requests.http`](requests.http).
 
 ### Local dotnet (LocalDB)
 
